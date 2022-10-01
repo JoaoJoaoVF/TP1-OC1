@@ -1,11 +1,11 @@
 
 .data
-vetor: .word 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+vetor: .word 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
 
 .text
 main:
     la x12, vetor # carrega o vetor para o registrador x12
-    addi x13, x0, 20 # aloca a quantidade de elementos que o vetor 
+    addi x13, x0, 19 # aloca a quantidade de elementos que o vetor 
     addi x13, x13, -1 # remove o valor de 1 casa do size do vetor
     slli x13, x13, 2 # realiza a multiplicação do size-1 por 2^4 resultando na quantidade de espaco de 4 bits necessario para guardar o vetor
     add x13, x13, x12 # adiciona o vetor na pilha 
