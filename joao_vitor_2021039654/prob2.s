@@ -1,5 +1,5 @@
 .data
-vetor: .word 7 9 1 8 1 7 4 0 6 2 0
+vetor: .word 1 2 3 4 5 6 7 8 9 10 11
 ##### START MODIFIQUE AQUI START #####
 ##### END MODIFIQUE AQUI END #####
 .text
