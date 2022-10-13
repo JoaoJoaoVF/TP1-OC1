@@ -1,7 +1,6 @@
 .data
 vetor: .word 7 9 1 8 1 7 4 0 6 2 0
 ##### START MODIFIQUE AQUI START #####
-#addi x13, x0, 11 # marca o registrador 13 como 11
 ##### END MODIFIQUE AQUI END #####
 .text
 main:
