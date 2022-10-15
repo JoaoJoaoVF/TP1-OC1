@@ -17,13 +17,13 @@ main:
 inverte: 
     addi sp, sp, -4 # volta 1 posicao na pilha
 	sw x1, 0(sp) # guarda o valor de x1 na pilha
-    lw x5, 0(x13) # carrega o primeiro elemento do vetor
-    lw x6, 0(x12) # carrega o ultimo elemento do vetor
-    sw x5, 0(x12) # coloca o primeiro elemento do vetor na ultima posicao
-    sw x6, 0(x13) # coloca o ultimo elemento do vetor na primeira posicao
+    lw x19, 0(x13) # carrega o primeiro elemento do vetor
+    lw x20, 0(x12) # carrega o ultimo elemento do vetor
+    sw x19, 0(x12) # coloca o primeiro elemento do vetor na ultima posicao
+    sw x20, 0(x13) # coloca o ultimo elemento do vetor na primeira posicao
     addi x12, x12, 4 # avanca 1 posicao no vetor 
     addi x13, x13, -4 # retorna 1 posicao no vetor 
-    beq x6, x5, retorna # se os valores de x6 e x5 forem iguais acaba
+    beq x20, x19, retorna # se os valores de x20 e x19 forem iguais acaba
     blt x13, x12 retorna # se o valore de x13 for < que x12 forem iguais acaba
     jal x1, inverte # realiza a chamada recursiva da funcao
 
