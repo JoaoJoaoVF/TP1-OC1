@@ -1,5 +1,5 @@
 .data
-vetor: .word 5 48 3 4 8 9 8 24 67 857 5 4 3 9
+vetor: .word 85 7 75 57 5787 5875 5 786 7657 42 254 6587 0 4 
 
 ##### START MODIFIQUE AQUI START #####
 ##### END MODIFIQUE AQUI END #####
@@ -12,129 +12,140 @@ main:
 
 ##### START MODIFIQUE AQUI START #####
 
-primeiraiteracao:
-	lw x6, 0(x12) # carrega o elemento do cpf
-	mul x6, x6, x15 # realiza a multiplicacao dele por a k, que vai de 10 a 2, decrescendo 1 unidade a cada passo, comecando na primeira posicao do CPF e indo ate a 9
+primeiraparte:
+	lw x6, 0(x12) # carrega o elemento do CPF/CNPJ
+
+	mul x6, x6, x15 # realiza a multiplicacao dele por a k, que vai de ate 2, decrescendo 1 unidade a cada passo
     add x17, x17, x6 # soma o resultado da multiplicação acima com as anteriores e guarda em x17
+    
 	addi x15, x15, -1 # diminui 1 de k
-	addi x12, x12, 4 # anda para o proximo algarismo do CPF
-    bne x15, x14, primeiraiteracao # enquanto nao chegar na posicao 9 realiza novamente a funcao
-    jalr x0, 0(x1) # retorna para a funcao verifica CPF
+	addi x12, x12, 4 # anda para o proximo algarismo do CPF/CNPJ
+    bne x15, x14, primeiraparte # enquanto nao chegar na posicao no limite de descrescimento, continua a parte
+
+    jalr x0, 0(x1) # retorna para a funcao verifica CPF/CNPJ
 
 
 segundainteracao:
-	lw x5, 0(x12)  # carrega o elemento do cpf
-	mul x5, x5, x13 # realiza a multiplicacao dele por a j, que vai de 11 a 2, decrescendo 1 unidade a cada passo, comecando na primeira posicao do CPF e indo ate a 10
+	lw x5, 0(x12)  # carrega o elemento do CPF/CNPJ
+
+	mul x5, x5, x13 # realiza a multiplicacao dele por a j, ate 2, decrescendo 1 unidade a cada passo
     add x18, x18, x5 # soma o resultado da multiplicação acima com as anteriores e guarda em x18 
+
 	addi x13, x13, -1 # diminui 1 de j
-	addi x12, x12, 4 # anda para o proximo algarismo do CPF
-    bne x13, x14, segundainteracao  # enquanto nao chegar na posicao 10 realiza novamente a funcao
-    jalr x0, 0(x1) # retorna para a funcao verifica CPF
+	addi x12, x12, 4 # anda para o proximo algarismo do CPF/CNPJ
+    bne x13, x14, segundainteracao  # enquanto nao chegar na posicao limite de descrescimento realiza novamente a funcao
+    
+    jalr x0, 0(x1) # retorna para a funcao verifica CPF/CNPJ
 
-falso: # da para reutilizar!!!!
-	addi x10, x10, 0 # coloca a resposta como falsa
-    jalr x0, 0(x1) # retorna para a funcao verifica CPF 
 
-verificadigito: # da para reutilizar!!!! eu acho
-	mul x17, x17, x15 # realiza a multiplicacao por 10 dos primeiros 9 elementos
+verificadigitoCPF:
+	mul x17, x17, x15 # realiza a multiplicacao por 10 da primeira parte
     rem x17, x17, x13 # realiza o mod de 11
-    mul x18, x18, x15 # realiza a multiplicacao por 10 dos primeiros 10 elementos
+    mul x18, x18, x15 # realiza a multiplicacao por 10 da segunda parte
     rem x18, x18, x13 # realiza o mod de 11
-    addi x12, x12, -40# volta a posicao do x12 para a primeira
+
+    addi x12, x12, -40# volta a posicao do x12 para a primeiro digito
     lw x7, 36(x12) # carrega o digito na posicao 10
     lw x8, 40(x12) # carrega o digito na posica 11
+
     rem x18, x18, x15 # realiza o mod de 10 para normalizar valores maiores que 10
     rem x17, x17, x15 # realiza o mod de 10 para normalizar valores maiores que 10
+
     bne x17, x7, falso # se o digito na posicao 10 for diferente do calculado, retorna falso
     bne x18, x8, falso # se o digito na posicao 11 for diferente do calculado, retorna falso
    	addi x10, x10, 1 # se nao for, retorna verdadeiro
+    
     jalr x0, 0(x1) # retorna para a funcao verifica CPF
     
     
-verificacpf: 
-	add x17, x0, x0 # guarda a soma de todos os valores do vetor na primeira passada
-    add x18, x0, x0 # guarda a soma de todos os valores do vetor na segunda rodada
-	addi x14, x0, 1 # o limite minimo que o vetor deve realizar as somas
-	addi x13, x0, 11 # aloca a quantidade de elementos que o vetor tem
-    addi x15, x0, 10 # coloca 10 o valor 10 em x14
+verificaCPF: 
+	addi x14, x0, 1 # o valor em que o vetor deve chegar para parar
+    
+	addi x13, x0, 11 # aloca a quantidade de elementos que devem ser analisados
+    addi x15, x0, 10 # coloca o valor em que se deve iniciar a multiplicacao
+
     sw x16, 0(x1) # salva o valor de x16 na pilha, para retorno
-    jal x1, primeiraiteracao # chama a primeira parte do algoritmo
-    addi x12, x12, -36 # volta a posicao do x12 para a primeira
+
+    jal x1, primeiraparte # chama a primeira parte do algoritmo
+
+    addi x12, x12, -36 # volta a posicao inical do CPF
     jal x1, segundainteracao # chama a segunda parte do algoritmo
+
     addi x13, x0, 11 # coloca 11 em x13 novamente para realizar o MOD
     addi x15, x0, 10 # coloca 10 em x13 novamente para realizar a multiplicação
-    jal x1, verificadigito #chama a funcao que verifica se os digitos sao iguais aos calculados
+
+    jal x1, verificadigitoCPF #chama a funcao que verifica se os digitos sao iguais aos calculados
     lw x1, 0(x16) # carrega o valor para retorno 
+    
     beq x0, x0, retorna # chama a funcao para sair da analise do CPF
 
 
 ##### VERIFICAÇÃO CNPJ ######
-    
-primeiraiteracaocnpj:
-	lw x6, 0(x12) # carrega o elemento do cpf
-	mul x6, x6, x15 # realiza a multiplicacao dele por a k, que vai de 10 a 2, decrescendo 1 unidade a cada passo, comecando na primeira posicao do CPF e indo ate a 9
-    add x17, x17, x6 # soma o resultado da multiplicação acima com as anteriores e guarda em x17
-	addi x15, x15, -1 # diminui 1 de k
-	addi x12, x12, 4 # anda para o proximo algarismo do CPF
-    bne x15, x14, primeiraiteracaocnpj # enquanto nao chegar na posicao 9 realiza novamente a funcao
-    jalr x0, 0(x1) # retorna para a funcao verifica CPF
 
 
-segundainteracaocnpj:
-	lw x5, 0(x12)  # carrega o elemento do cpf
-	mul x5, x5, x13 # realiza a multiplicacao dele por a j, que vai de 11 a 2, decrescendo 1 unidade a cada passo, comecando na primeira posicao do CPF e indo ate a 10
-    add x18, x18, x5 # soma o resultado da multiplicação acima com as anteriores e guarda em x18 
-	addi x13, x13, -1 # diminui 1 de j
-	addi x12, x12, 4 # anda para o proximo algarismo do CPF
-    bne x13, x14, segundainteracaocnpj  # enquanto nao chegar na posicao 10 realiza novamente a funcao
-    jalr x0, 0(x1) # retorna para a funcao verifica CPF
-
-verificadigitocnpj: # da para reutilizar!!!! eu acho
-	mul x17, x17, x15 # realiza a multiplicacao por 10 dos primeiros 9 elementos
+verificadigitoCNPJ: 
+	mul x17, x17, x15 # realiza a multiplicacao por 10 da primeira parte
     rem x17, x17, x13 # realiza o mod de 11
-    mul x18, x18, x15 # realiza a multiplicacao por 10 dos primeiros 10 elementos
+    mul x18, x18, x15 # realiza a multiplicacao por 10 da segunda parte
     rem x18, x18, x13 # realiza o mod de 11
-    addi x12, x12, -52# volta a posicao do x12 para a primeira
-    lw x7, 48(x12) # carrega o digito na posicao 10
-    lw x8, 52(x12) # carrega o digito na posica 11
+
+    addi x12, x12, -52 # volta a posicao do inical do CNPJ
+    lw x7, 48(x12) # carrega o digito na posicao 13
+    lw x8, 52(x12) # carrega o digito na posica 14
+
     rem x18, x18, x15 # realiza o mod de 10 para normalizar valores maiores que 10
     rem x17, x17, x15 # realiza o mod de 10 para normalizar valores maiores que 10
-    bne x17, x7, falso # se o digito na posicao 10 for diferente do calculado, retorna falso
-    bne x18, x8, falso # se o digito na posicao 11 for diferente do calculado, retorna falso
-   	addi x10, x10, 1 # se nao for, retorna verdadeiro
-    jalr x0, 0(x1) # retorna para a funcao verifica CPF
 
-verificacnpj: 
-	add x17, x0, x0 # guarda a soma de todos os valores do vetor na primeira passada
-    add x18, x0, x0 # guarda a soma de todos os valores do vetor na segunda rodada
+    bne x17, x7, falso # se o digito na posicao 13 for diferente do calculado, retorna falso
+    bne x18, x8, falso # se o digito na posicao 14 for diferente do calculado, retorna falso
+   	addi x10, x10, 1 # se nao for, retorna verdadeiro
+
+    jalr x0, 0(x1) # retorna para a funcao verifica CNPJ
+
+verificaCNPJ: 
 	addi x14, x0, 1 # o valor em que o vetor deve chegar para parar
-	addi x13, x0, 5 # aloca a quantidade de elementos que o vetor tem
-    addi x15, x0, 5 # coloca 10 o valor 10 em x15
+
+	addi x13, x0, 5 # aloca a quantidade de elementos que devem ser analisados
+    addi x15, x0, 5 # coloca o valor em que se deve iniciar a multiplicacao
     sw x16, 0(x1) # salva o valor de x16 na pilha, para retorno
-    jal x1, primeiraiteracaocnpj # chama a primeira parte do algoritmo
+    jal x1, primeiraparte # chama a primeira parte do algoritmo
+
+
     addi x12, x12, -16 # volta a posicao do x12 para a primeira
-    addi x13, x13, 1 # adiciona 1 a x13
-    jal x1, segundainteracaocnpj # chama a segunda parte do algoritmo
-    addi x12, x12, -4 # volta a posicao do x12 para a primeira
-	addi x13, x0, 8 # aloca a quantidade de elementos que o vetor tem
-    addi x15, x0, 9 # coloca 10 o valor 10 em x15
-    sw x16, 0(x1) # salva o valor de x16 na pilha, para retorno
-    jal x1, primeiraiteracaocnpj # chama a primeira parte do algoritmo
-    addi x12, x12, -28 # volta a posicao do x12 para a primeira
-	addi x13, x0, 9 # aloca a quantidade de elementos que o vetor tem
-    jal x1, segundainteracaocnpj # chama a segunda parte do algoritmo
+    addi x13, x13, 1 # adiciona 1 a x13 para realizar a segunda rodada
+    jal x1, segundainteracao # chama a segunda parte do algoritmo
+
+    addi x12, x12, -4 # volta para a posicao central do CNPJ
+	addi x13, x0, 8 # aloca a quantidade de elementos que devem ser analisados
+    addi x15, x0, 9 # coloca o valor em que se deve iniciar a multiplicacao
+    # sw x16, 0(x1) # salva o valor de x16 na pilha, para retorno
+    jal x1, primeiraparte # chama a primeira parte do algoritmo
+
+    addi x12, x12, -28 # volta para a posicao central do CNPJ
+	addi x13, x0, 9 # coloca o valor em que se deve iniciar a multiplicacao
+    jal x1, segundainteracao # chama a segunda parte do algoritmo
+
+
     addi x13, x0, 11 # coloca 11 em x13 para realizar o MOD
     addi x15, x0, 10 # coloca 10 em x13 para realizar a multiplicação
-    jal x1, verificadigitocnpj #chama a funcao que verifica se os digitos sao iguais aos calculados
+    jal x1, verificadigitoCNPJ #chama a funcao que verifica se os digitos sao iguais aos calculados
     lw x1, 0(x16) # carrega o valor para retorno 
+
     beq x0, x0, retorna # chama a funcao para sair da analise do CPF
 
-retorna: # da para reutilizar!!!!
+falso: 
+	addi x10, x10, 0 # coloca a resposta como falsa
+    jalr x0, 0(x1) # retorna para a funcao verifica CPF/CNPJ 
+
+retorna:
     jalr x0, 0(x1) # realiza o retorno da funcao
 
 verificadastro: 
-	beq x14, x0, verificacpf # se o valor do registrador x14 for zero, chama a função verificacpf
-    jal x1, verificacnpj # se o valor do registrador x14 for diferente de zero, chama a função verificacnpj
+	add x17, x0, x0 # guarda a soma de todos os valores do vetor na primeira parte
+    add x18, x0, x0 # guarda a soma de todos os valores do vetor na segunda parte
+    
+	beq x14, x0, verificaCPF # se o valor do registrador x14 for zero, chama a função verificaCPF
+    jal x1, verificaCNPJ # se o valor do registrador x14 for diferente de zero, chama a função verificaCNPJ
     jal x0,retorna # chama a função retorna
 
 ##### END MODIFIQUE AQUI END #####
